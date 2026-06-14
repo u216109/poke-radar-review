@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Poke Radar - eBay Application Review</title>
+  <meta name="description" content="Public review page for Poke Radar, an internal Pokemon TCG market analytics tool requesting access to the eBay Buy Marketplace Insights API.">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --ink: #111827;
+      --muted: #5b6472;
+      --line: #d9dee7;
+      --panel: #ffffff;
+      --accent: #0f766e;
+      --accent-2: #1d4ed8;
+      --warn: #a16207;
+      --soft: #e8f3f1;
+      --soft-blue: #eaf0ff;
+      --shadow: 0 18px 50px rgba(17, 24, 39, 0.10);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+    }
+
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.95fr);
+      gap: 28px;
+      align-items: center;
+      padding: 36px 0 28px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 14px;
+      padding: 7px 11px;
+      border: 1px solid #b7ddd6;
+      background: var(--soft);
+      color: #0f5f59;
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 999px;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 760px;
+      font-size: clamp(34px, 5vw, 62px);
+      line-height: 1.02;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      margin: 18px 0 0;
+      max-width: 720px;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 6px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: #263241;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .preview {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .preview-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfe;
+    }
+
+    .preview-title {
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .preview-tag {
+      color: #0f5f59;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .preview-body {
+      display: grid;
+      grid-template-columns: 0.86fr 1.14fr;
+      gap: 14px;
+      padding: 16px;
+    }
+
+    .metric-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .metric {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 20px;
+      line-height: 1.1;
+    }
+
+    .bars {
+      display: grid;
+      align-content: end;
+      gap: 12px;
+      min-height: 220px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #ffffff, #f9fafb);
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 82px minmax(0, 1fr) 42px;
+      gap: 10px;
+      align-items: center;
+      font-size: 12px;
+      color: #344256;
+    }
+
+    .bar {
+      height: 12px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      overflow: hidden;
+    }
+
+    .bar i {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--accent);
+    }
+
+    .bar-row:nth-child(2) .bar i {
+      background: var(--accent-2);
+    }
+
+    .bar-row:nth-child(3) .bar i {
+      background: var(--warn);
+    }
+
+    section {
+      margin-top: 22px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 23px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 20px 0 8px;
+      font-size: 17px;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0 0 12px;
+    }
+
+    ul {
+      margin: 10px 0 0;
+      padding-left: 20px;
+    }
+
+    li {
+      margin: 6px 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .facts {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .fact {
+      min-height: 104px;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+    }
+
+    .fact span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .fact strong {
+      display: block;
+      margin-top: 7px;
+      font-size: 16px;
+      line-height: 1.35;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .step {
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+    }
+
+    .step b {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--accent);
+      font-size: 13px;
+    }
+
+    .note {
+      padding: 14px 16px;
+      border: 1px solid #bdd5ff;
+      border-radius: 8px;
+      background: var(--soft-blue);
+      color: #1f3f7a;
+      font-weight: 700;
+    }
+
+    code {
+      padding: 2px 5px;
+      border-radius: 5px;
+      background: #f1f5f9;
+      color: #0f172a;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 0.95em;
+    }
+
+    footer {
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    @media (max-width: 820px) {
+      .hero,
+      .grid,
+      .facts,
+      .flow,
+      .preview-body {
+        grid-template-columns: 1fr;
+      }
+
+      main {
+        padding: 22px 14px 36px;
+      }
+
+      section {
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="hero">
+      <div>
+        <p class="eyebrow">eBay Application Growth Check Review Page</p>
+        <h1>Poke Radar</h1>
+        <p class="lead">
+          Poke Radar is an internal Pokemon TCG market analytics tool that compares recent eBay sold activity,
+          transaction volume, and price trends with Japanese market prices from Pokeca Chart.
+        </p>
+        <div class="hero-actions" aria-label="Application summary tags">
+          <span class="pill">Internal analytics only</span>
+          <span class="pill">No raw data resale</span>
+          <span class="pill">Server-side credentials</span>
+          <span class="pill">Scheduled daily analysis</span>
+        </div>
+      </div>
+
+      <aside class="preview" aria-label="Sample analytics dashboard preview">
+        <div class="preview-top">
+          <div class="preview-title">Market Signals Overview</div>
+          <div class="preview-tag">Aggregated results</div>
+        </div>
+        <div class="preview-body">
+          <div class="metric-stack">
+            <div class="metric">
+              <span>Price gap</span>
+              <strong>JPY based</strong>
+            </div>
+            <div class="metric">
+              <span>Activity</span>
+              <strong>Sold count</strong>
+            </div>
+            <div class="metric">
+              <span>Sources</span>
+              <strong>eBay + Pokeca Chart</strong>
+            </div>
+          </div>
+          <div class="bars" aria-label="Example chart representation">
+            <div class="bar-row">
+              <span>Price</span>
+              <div class="bar"><i style="width: 78%"></i></div>
+              <span>78</span>
+            </div>
+            <div class="bar-row">
+              <span>eBay activity</span>
+              <div class="bar"><i style="width: 64%"></i></div>
+              <span>64</span>
+            </div>
+            <div class="bar-row">
+              <span>Gap rate</span>
+              <div class="bar"><i style="width: 52%"></i></div>
+              <span>52</span>
+            </div>
+            <div class="bar-row">
+              <span>Gap amount</span>
+              <div class="bar"><i style="width: 46%"></i></div>
+              <span>46</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <section>
+      <h2>Application Details</h2>
+      <p>
+        Poke Radar is used by our company as an internal decision-support tool for Pokemon trading card market
+        analysis. It is not a public consumer marketplace, not an eBay listing tool, and not an application for
+        collecting eBay usernames, passwords, buyer details, seller details, or private user information.
+      </p>
+      <div class="facts">
+        <div class="fact">
+          <span>Required API</span>
+          <strong>Buy Marketplace Insights API</strong>
+        </div>
+        <div class="fact">
+          <span>Required OAuth scope</span>
+          <strong><code>buy.marketplace.insights</code></strong>
+        </div>
+        <div class="fact">
+          <span>Use case</span>
+          <strong>Internal market analytics and price-gap monitoring</strong>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Purpose of Request</h2>
+      <p class="note">
+        We are requesting Production access to a restricted API: the Buy Marketplace Insights API.
+      </p>
+      <p>
+        The application compares recent eBay sold activity, transaction volume, and price trends with Japanese
+        market prices from Pokeca Chart. The purpose is to identify cards with increased overseas demand or
+        significant price gaps between overseas and Japanese markets.
+      </p>
+      <p>
+        The requested OAuth scope is
+        <code>https://api.ebay.com/oauth/api_scope/buy.marketplace.insights</code>.
+      </p>
+    </section>
+
+    <section>
+      <h2>How the Application Works</h2>
+      <div class="flow">
+        <div class="step">
+          <b>1. Candidate discovery</b>
+          Select monitored Pokemon TCG cards from Japanese market activity and eBay activity signals.
+        </div>
+        <div class="step">
+          <b>2. Market data collection</b>
+          Collect recent eBay sold activity and Japanese market prices for monitored cards.
+        </div>
+        <div class="step">
+          <b>3. Aggregated analysis</b>
+          Calculate price, transaction count, price gap, gap rate, and ranking score.
+        </div>
+        <div class="step">
+          <b>4. Internal reporting</b>
+          Display results in a local dashboard and internal reports for business analysis.
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Data Usage and Compliance</h2>
+      <div class="grid">
+        <div>
+          <h3>What we use</h3>
+          <ul>
+            <li>Aggregated sold activity and pricing signals.</li>
+            <li>Recent transaction count and price trend indicators.</li>
+            <li>Comparison with Japanese market prices from Pokeca Chart.</li>
+            <li>Internal ranking and monitoring reports.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>What we do not do</h3>
+          <ul>
+            <li>We do not resell raw eBay data.</li>
+            <li>We do not display buyer or seller private information.</li>
+            <li>We do not collect eBay usernames or passwords.</li>
+            <li>We do not share raw eBay data with third parties.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Operational Details</h2>
+      <ul>
+        <li>The application runs scheduled analysis approximately once per day.</li>
+        <li>Expected call volume is about 100 to 300 API calls per day, with a maximum estimated peak of up to 1,000 calls per day during testing or expanded monitoring.</li>
+        <li>The application does not perform continuous polling.</li>
+        <li>OAuth credentials are stored server-side only.</li>
+        <li>Secrets are not exposed in logs, browser UI, or client-side code.</li>
+        <li>The application handles API errors gracefully and limits API calls to the minimum needed for analysis.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Public Availability</h2>
+      <p>
+        The operational analytics tool is an internal local web application used by our company only and is not
+        publicly accessible. This page is provided as a public information page for eBay application review.
+      </p>
+    </section>
+
+    <footer>
+      Poke Radar application review page. This page contains no API credentials, tokens, private user data, or raw eBay data.
+    </footer>
+  </main>
+</body>
+</html>
